@@ -1,17 +1,17 @@
-# $package
+# quant-wheel
 A template repository for building python packages. Please replace `$package` with the package's name.
 
 ## Installation
 ```sh
-$ pip install $package
+$ pip install quant-wheel
 ```
 
 ## See Also
 ### Github repository
-* https://github.com/Chitaoji/$package/
+* https://github.com/Chitaoji/quant-wheel/
 
 ### PyPI project
-* https://pypi.org/project/$package/
+* https://pypi.org/project/quant-wheel/
 
 ## License
 This project falls under the BSD 3-Clause License.
