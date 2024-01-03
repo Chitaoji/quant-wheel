@@ -1,5 +1,5 @@
 # quant-wheel
-A template repository for building python packages. Please replace `$package` with the package's name.
+Wheels for quantitative research.
 
 ## Installation
 ```sh

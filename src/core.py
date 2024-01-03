@@ -1,7 +1,7 @@
 """
-Contains the core of $package: ... , etc.
+Contains the core of quant-wheel: ... , etc.
 
 NOTE: this module is private. All functions and objects are available in the main
-`$package` namespace - use that instead.
+`quant_wheel` namespace - use that instead.
 
 """
