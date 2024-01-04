@@ -6,12 +6,13 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Optional, Tuple, TypeVar, Union, overload
+from typing import Any, Generic, Optional, Tuple, TypeVar, Union, get_args, overload
 
 from attrs import define
 from attrs import field as attrs_field  # Avoid confusion with the field we export.
 
 D = TypeVar("D", "D1", "D2")
+Value = Union[int, float]
 
 __all__ = ["Field", "D1", "D2"]
 
@@ -82,19 +83,22 @@ class D2(metaclass=D2Type):
 class Field(Generic[D]):
     """Abstract field type."""
 
-    data: D
+    data: Union[D, Value]
     tickers: Optional[list] = attrs_field(default=None)
     timestamps: Optional[list] = attrs_field(default=None)
     __dim: Union[D1Type, D2Type] = attrs_field(init=False, alias="__dim")
 
     def __attrs_post_init__(self) -> None:
-        if isinstance(self.data, D1):
+        if isinstance(data := self.data, get_args(Value)):
+            self.create_empty()
+            self.fill(data)
+        elif isinstance(data, D1):
             self.__dim = D1
-        elif isinstance(self.data, D2):
+        elif isinstance(data, D2):
             self.__dim = D2
         else:
             raise TypeError(
-                f"attribute 'data' should be of type 'D1' or 'D2', got '{type(self.data).__name__}'"
+                f"attribute 'data' should be of type 'D1' or 'D2', got '{type(data).__name__}'"
             )
 
     @overload
@@ -111,3 +115,17 @@ class Field(Generic[D]):
     def dim(self):
         """Dimension of the data."""
         return self.__dim
+
+    @abstractmethod
+    def create_empty(self) -> None:
+        """
+        Create an empty memory space for the data.
+
+        """
+
+    @abstractmethod
+    def fill(self, value: Value) -> None:
+        """
+        Fill the data with value.
+
+        """
