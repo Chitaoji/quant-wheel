@@ -17,7 +17,8 @@ N_SNAPSHOTS = 4803
 
 
 class TsOperator:
-    def __init__(self):
+    def __init__(self, fieldtype: Type[Field]):
+        self.fieldtype = fieldtype
         self._join_()
 
     def _accumulate(
@@ -38,25 +39,25 @@ class TsOperator:
 
         if (op_name + "_row", _count) not in self.__cache__:
             if method in ["back", "forward"]:
-                df = pd.DataFrame(np.nan, index=range(n), columns=x.tickers)
+                fld = self.fieldtype(np.nan, timestamps=range(n), tickers=x.tickers)
                 if default is not None:
-                    df.iloc[:] = default
-                self.__cache__[(op_name, _count)] = df
+                    fld.fill(default)
+                self.__cache__[(op_name, _count)] = fld
             self.__cache__[(op_name + "_row", _count)] = 0
 
         if method == "back":
-            df: pd.DataFrame = self.__cache__[(op_name, _count)]
-            df = df.shift(-1)
-            df.loc[df.shape[0] - 1] = x
-            self.__cache__[(op_name, _count)] = df
-            return df
+            fld: Field = self.__cache__[(op_name, _count)]
+            fld = fld.shift(-1)
+            fld.insert(fld.shape[0] - 1, x)
+            self.__cache__[(op_name, _count)] = fld
+            return fld
         elif method == "forward":
-            df: pd.DataFrame = self.__cache__[(op_name, _count)]
+            fld: Field = self.__cache__[(op_name, _count)]
             _row: int = self.__cache__[(op_name + "_row", _count)]
-            df.iloc[_row] = x
+            fld.iloc[_row] = x
             self.__cache__[(op_name + "_row", _count)] = _row + 1
-            self.__cache__[(op_name, _count)] = df
-            return df
+            self.__cache__[(op_name, _count)] = fld
+            return fld
         elif method == "increasing":
             _row: int = self.__cache__[(op_name + "_row", _count)]
             self.__cache__[(op_name + "_row", _count)] = _row + 1
