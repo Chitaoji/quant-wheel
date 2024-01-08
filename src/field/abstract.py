@@ -1,165 +1,61 @@
 """
-Contains the abstract classes: Field, D1, D2, etc.
+Contains the abstract class: AbstractField.
 
 NOTE: this module is private. All functions and objects are available in the main
 `quant_wheel` namespace - use that instead.
 
 """
-from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union
+from abc import ABC, abstractmethod
+from typing import Any, Optional, Type, Union
 
-from attrs import define
-from attrs import field as attrs_field  # Avoid confusion with the field we export.
+from ._types import D0, D1, D2, Dim, Field, Num
 
-D = TypeVar("D", "D1", "D2")
-
-
-__all__ = ["Field", "Num", "D1", "D2"]
+__all__ = ["AbstractField"]
 
 
-class Num(metaclass=ABCMeta):
-    """Num includes int and float."""
-
-    @classmethod
-    def __subclasshook__(cls, __subclass: type) -> bool:
-        if cls is Num:
-            return issubclass(__subclass, (int, float))
-        return False
-
-
-class D1Meta(ABCMeta):
-    """Metaclass of D1."""
-
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
-
-
-class D2Meta(ABCMeta):
-    """Metaclass of D2."""
-
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
-
-
-class D1(metaclass=D1Meta):
-    """
-    D1 stands for 1-dimension.
-
-    """
-
-    @abstractmethod
-    def __init__(self) -> None:
-        ...
-
-    @property
-    @abstractmethod
-    def shape(self) -> Tuple[int]:
-        """
-        Shape of data.
-
-        Returns
-        -------
-        Tuple[int]
-            1-dimensional Tuple.
-
-        """
-
-
-class D2(metaclass=D2Meta):
-    """
-    D2 stands for 2-dimension.
-
-    """
-
-    @abstractmethod
-    def __init__(self) -> None:
-        ...
-
-    @property
-    @abstractmethod
-    def shape(self) -> Tuple[int, int]:
-        """
-        Shape of data.
-
-        Returns
-        -------
-        Tuple[int, int]
-            2-dimensional Tuple.
-
-        """
-
-
-@define
-class Field(Generic[D]):
+class AbstractField(ABC):
     """Abstract field type."""
 
+    @abstractmethod
     def __init__(
         self,
-        data: Union[D, Num],
+        data: Any,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
     ) -> None:
-        self.tickers = tickers
-        self.timestamps = timestamps
-        if isinstance(data, Num):
-            self.create_empty()
-            self.fill(data)
-        elif isinstance(data, D1):
-            self.data: D = data
-            self.dim: Type[D] = D1
-        elif isinstance(data, D2):
-            self.data = data
-            self.dim = D2
-        else:
-            raise TypeError(
-                f"attribute 'data' should be of type 'D1' or 'D2', got '{type(data).__name__}'"
-            )
-
-    @property
-    def shape(self) -> Tuple[int, ...]:
-        return self.data.shape
+        ...
 
     @abstractmethod
-    def create_empty(self) -> None:
-        """
-        Create an empty memory space for the data.
-
-        """
-
-    @abstractmethod
-    def fill(self, value: Num) -> None:
-        """
-        Fill the data with value.
-
-        Parameters
-        ----------
-        value : Num
-            Value to fill with.
-
-        """
+    def expand(self, tickers: list, timestamps: Optional[list] = None) -> "Field":
+        """Abstract method for D1 only."""
 
     @abstractmethod
     def shift(self, n: int = 1) -> None:
-        """
-        Shift timestamps by desired number of periods with an optional time n.
-
-        Parameters
-        ----------
-        n : int
-            Number of periods to shift.
-
-        """
+        """Abstract method for D2 only."""
 
     @abstractmethod
-    def insert(self, n: int, value: Union[Num, "Field[D1]"]) -> None:
-        """
-        Inserts the value at position `n` in the data structure.
+    def setrow(self, n: int, value: Union[Num, "Field[D1]"]) -> None:
+        """Abstract method for D2 only."""
 
-        Parameters
-        ----------
-        n : int
-            Represents the index at which the value should be inserted.
-        value : Union[Num, Field[D1]]
-            Value to be inserted.
+    # Tools maybe helpful
+    def _check_data_dim(self, data: Any) -> Type[Dim]:
+        if isinstance(data, D0):
+            dim = D0
+            self.__check_attr_is_none("tickers", dim)
+            self.__check_attr_is_none("timestamps", dim)
+        elif isinstance(data, D1):
+            dim = D1
+            self.__check_attr_is_none("timestamps", dim)
+        elif isinstance(data, D2):
+            dim = D2
+        else:
+            raise TypeError(
+                f"attribute 'data' should be of type D0, D1 or D2, got {type(data).__name__}"
+            )
+        return dim
 
-        """
+    def __check_attr_is_none(self, __name: str, __dim: Type[Dim]) -> None:
+        if v := getattr(self, __name) is not None:
+            raise ValueError(
+                f"{__name} should be None when dim = {__dim.__name__}, got {v}"
+            )

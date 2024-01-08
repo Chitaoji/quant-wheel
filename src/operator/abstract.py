@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from ..field import D1, Field
+from ..field import D0, D1, D2, Field
 
 DfSrs = Union[pd.DataFrame, pd.Series]
 DfSrsVar = TypeVar("DfSrsVar", pd.DataFrame, pd.Series)
@@ -39,25 +39,27 @@ class TsOperator:
 
         if (op_name + "_row", _count) not in self.__cache__:
             if method in ["back", "forward"]:
-                fld = self.fieldtype(np.nan, timestamps=range(n), tickers=x.tickers)
-                if default is not None:
-                    fld.fill(default)
+                if default is None:
+                    default = np.nan
+                fld = self.fieldtype(default).expand(
+                    timestamps=list(range(n)), tickers=x.tickers
+                )
                 self.__cache__[(op_name, _count)] = fld
             self.__cache__[(op_name + "_row", _count)] = 0
 
         if method == "back":
-            fld: Field = self.__cache__[(op_name, _count)]
-            fld = fld.shift(-1)
-            fld.insert(fld.shape[0] - 1, x)
-            self.__cache__[(op_name, _count)] = fld
-            return fld
+            v: Field[D2] = self.__cache__[(op_name, _count)]
+            v = v.shift(-1)
+            v.setrow(v.shape[0] - 1, x)
+            self.__cache__[(op_name, _count)] = v
+            return v
         elif method == "forward":
-            fld: Field = self.__cache__[(op_name, _count)]
+            v: Field[D2] = self.__cache__[(op_name, _count)]
             _row: int = self.__cache__[(op_name + "_row", _count)]
-            fld.iloc[_row] = x
+            v.setrow(_row, x)
             self.__cache__[(op_name + "_row", _count)] = _row + 1
-            self.__cache__[(op_name, _count)] = fld
-            return fld
+            self.__cache__[(op_name, _count)] = v
+            return v
         elif method == "increasing":
             _row: int = self.__cache__[(op_name + "_row", _count)]
             self.__cache__[(op_name + "_row", _count)] = _row + 1
