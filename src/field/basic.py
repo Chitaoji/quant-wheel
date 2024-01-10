@@ -9,11 +9,11 @@ from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 import pandas as pd
 
-if TYPE_CHECKING:
-    from pandas import DataFrame, Series
-
 from ._types import D1, Data, Field, Num
 from .abstract import AbstractField
+
+if TYPE_CHECKING:
+    from pandas import DataFrame, Series
 
 __all__ = ["PandasField"]
 
@@ -36,6 +36,8 @@ class PandasField(AbstractField):
             tickers = tickers if tickers else data.index.tolist()
             timestamps = timestamps if timestamps else data.index.tolist()
             self.data, self.tickers, self.timestamps = data, tickers, timestamps
+        else:
+            self.data, self.tickers, self.timestamps = data, None, None
 
     def shift(self, n: int = 1) -> None:
         """Abstract method."""

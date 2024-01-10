@@ -13,8 +13,8 @@ class _NeverInstantiateMeta(type):
     use_instead: ClassVar[Optional[str]] = None
 
     def __call__(cls, *args, **kwargs):
-        use_instead_hint = f"; use {cls.use_instead} instead" if cls.use_instead else ""
-        raise TypeError(f"type {cls.__name__} cannot be instantiated{use_instead_hint}")
+        extended_msg = f"; use {cls.use_instead} instead" if cls.use_instead else ""
+        raise TypeError(f"type {cls.__name__} cannot be instantiated{extended_msg}")
 
 
 class _NeverInstantiate(metaclass=_NeverInstantiateMeta):

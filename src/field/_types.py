@@ -146,14 +146,14 @@ class Field(Generic[D], metaclass=_FieldMeta):
 
     def setrow(self: "Field[D2]", n: int, value: Union[Num, "Field[D1]"]) -> None:
         """
-        Set a row in a 2-dimensional field with a given value.
+        Set a row in the 2-dimensional field with a given value.
 
         Parameters
         ----------
         n : int
-            Represents the index of the row that you want to set in the field.
+            Represents the index of the row to be set in the field.
         value : Union[Num, Field[D1]]
-            Value to be set, can be either a number (`Num`) or a 1-dimensional
+            Value to set with, can be either a number (`Num`) or a 1-dimensional
             field (`Field[D1]`).
 
         """

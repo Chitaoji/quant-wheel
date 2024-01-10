@@ -61,8 +61,9 @@ def field(
         Symbols of tickers, by default None.
     timestamps : Optional[list], optional
         The timestamps associated with the data, by default None.
-    impl : Optional[Literal[&quot;pandas&quot;]], optional
-        Specifies the implementation type to use for the Field object, by default None.
+    impl : Optional[Literal[pandas]], optional
+        Specifies the implementation type to use for the Field object, by default
+        None.
 
     Returns
     -------
