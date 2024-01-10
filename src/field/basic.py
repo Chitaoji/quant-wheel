@@ -5,9 +5,14 @@ NOTE: this module is private. All functions and objects are available in the mai
 `quant_wheel` namespace - use that instead.
 
 """
-from typing import Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
-from ._types import D1, Field, Num
+import pandas as pd
+
+if TYPE_CHECKING:
+    from pandas import DataFrame, Series
+
+from ._types import D1, Data, Field, Num
 from .abstract import AbstractField
 
 __all__ = ["PandasField"]
@@ -21,11 +26,16 @@ class PandasField(AbstractField):
         data: Any,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
-    ) -> None:
-        ...
-
-    def expand(self, tickers: list, timestamps: Optional[list] = None) -> "Field":
-        """Abstract method."""
+    ) -> Tuple[Data, list, list]:
+        if isinstance(data, Num):
+            self.data, self.tickers, self.timestamps = data, None, None
+        elif isinstance(data, pd.Series):
+            tickers = tickers if tickers else data.index.tolist()
+            self.data, self.tickers, self.timestamps = data, tickers, None
+        elif isinstance(data, pd.DataFrame):
+            tickers = tickers if tickers else data.index.tolist()
+            timestamps = timestamps if timestamps else data.index.tolist()
+            self.data, self.tickers, self.timestamps = data, tickers, timestamps
 
     def shift(self, n: int = 1) -> None:
         """Abstract method."""

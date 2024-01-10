@@ -11,12 +11,12 @@ from ..field import D0, D1, D2, Field
 DfSrs = Union[pd.DataFrame, pd.Series]
 DfSrsVar = TypeVar("DfSrsVar", pd.DataFrame, pd.Series)
 
-__all__ = ["TsOperator"]
+__all__ = ["AbstractTsOperator"]
 
 N_SNAPSHOTS = 4803
 
 
-class TsOperator:
+class AbstractTsOperator:
     def __init__(self, fieldtype: Type[Field]):
         self.fieldtype = fieldtype
         self._join_()
@@ -30,7 +30,7 @@ class TsOperator:
         method: str = "back",
     ) -> Union[pd.DataFrame, int]:
         if op_name == "":
-            raise ValueError("op_name cannot be specified as ''")
+            raise ValueError("the operator name cannot be specified as ''")
 
         if op_name not in self._op_count:
             self._op_count[op_name] = 0

@@ -8,15 +8,12 @@ NOTE: this module is private. All functions and objects are available in the mai
 from abc import abstractmethod
 from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union, overload
 
-from typing_extensions import TypeAlias
-
 from .._types import _NeverInstantiate, _NeverInstantiateMeta
 
+Data = Union["D0", "D1", "D2"]
 D = TypeVar("D", "D0", "D1", "D2")
-Dim = Union["D0", "D1", "D2"]
-Num: TypeAlias = "D0"  # `Num` is a human-readable alias for `D0`
 
-__all__ = ["Field", "Num", "D0", "D1", "D2", "Dim"]
+__all__ = ["Field", "Num", "D0", "D1", "D2", "Data"]
 
 
 class _D0Meta(_NeverInstantiateMeta):
@@ -36,19 +33,22 @@ class _D2Meta(_NeverInstantiateMeta):
 
 class D0(metaclass=_D0Meta):
     """
-    D0 stands for 0-dimensional objects, usually refering to ints and floats.
+    D0 stands for 0-dimensional data, usually refering to ints and floats.
 
     """
 
 
+Num = D0  # `Num` is a human-readable alias for `D0`
+
+
 class D1(metaclass=_D1Meta):
-    """D1 stands for 1-dimensional objects."""
+    """D1 stands for 1-dimensional data."""
 
     shape: Tuple[int]
 
 
 class D2(metaclass=_D2Meta):
-    """D2 stands for 2-dimensional objects."""
+    """D2 stands for 2-dimensional data."""
 
     shape: Tuple[int, int]
 
@@ -132,25 +132,6 @@ class Field(Generic[D], metaclass=_FieldMeta):
         timestamps: Optional[list] = None,
     ) -> None:
         ...
-
-    @overload
-    def expand(
-        self: "Field[D0]", tickers: list, timestamps: None = None
-    ) -> "Field[D1]":
-        ...
-
-    @overload
-    def expand(
-        self: "Field[D0]", tickers: list, timestamps: list = None
-    ) -> "Field[D2]":
-        ...
-
-    def expand(self, tickers: list, timestamps: Optional[list] = None) -> "Field":
-        """
-        Create a new memory space according to tickers and timestamps, then
-        fill it with data.
-
-        """
 
     def shift(self: "Field[D2]", n: int = 1) -> None:
         """
