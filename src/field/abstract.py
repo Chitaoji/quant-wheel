@@ -32,23 +32,12 @@ class _AbstractFieldMeta(ABCMeta):
             )
 
 
-def impl_validate(validator: Callable) -> Callable[[C], C]:
-    def decorator(func: C) -> C:
-        @wraps(func)
-        def wrapper(self: object, *args, **kwargs) -> Any:
-            result = func(self, *args, **kwargs)
-            validator(*result)
-            return result
-
-        return wrapper
-
-    return decorator
-
-
 def impl_validator(method: Callable) -> Callable[[C], C]:
     """
-    Mark the decorated function as a validator of all the implementions of
-    the specified abstract method.
+    Mark the decorated function as a validator of the specified abstract
+    method. If the method is implemented by subclasses, the validator
+    should check the return types of the new method, and throw a
+    MethodImplementionError if the types aren't correct.
 
     Parameters
     ----------
@@ -57,8 +46,8 @@ def impl_validator(method: Callable) -> Callable[[C], C]:
 
     Returns
     -------
-    Callable
-        A validator the specified method.
+    Callable[[C], C]
+        A decorator to mark the validator.
 
     """
 
@@ -73,6 +62,34 @@ def impl_validator(method: Callable) -> Callable[[C], C]:
                     f"{method.__name__}() in {type(self)}."
                 )
                 raise e
+
+        return wrapper
+
+    return decorator
+
+
+def impl_validate(validator: Callable) -> Callable[[C], C]:
+    """
+    Validate the decorated function with the specified validator.
+
+    Parameters
+    ----------
+    validator : Callable
+        A validator of method.
+
+    Returns
+    -------
+    Callable[[C], C]
+        A decorator to validate the methods.
+
+    """
+
+    def decorator(func: C) -> C:
+        @wraps(func)
+        def wrapper(self: object, *args, **kwargs) -> Any:
+            result = func(self, *args, **kwargs)
+            validator(*result)
+            return result
 
         return wrapper
 
