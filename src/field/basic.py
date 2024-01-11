@@ -1,5 +1,5 @@
 """
-Contains a pandas implemention of Field.
+Contains a pandas implemention of Field: PandasField.
 
 NOTE: this module is private. All functions and objects are available in the main
 `quant_wheel` namespace - use that instead.

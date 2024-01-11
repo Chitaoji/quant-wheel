@@ -5,7 +5,6 @@ NOTE: this module is private. All functions and objects are available in the mai
 `quant_wheel` namespace - use that instead.
 
 """
-from abc import abstractmethod
 from typing import Any, Generic, Optional, Tuple, Type, TypeVar, Union, overload
 
 from .._types import _NeverInstantiate, _NeverInstantiateMeta
@@ -21,16 +20,6 @@ class _D0Meta(_NeverInstantiateMeta):
         return isinstance(__instance, (int, float))
 
 
-class _D1Meta(_NeverInstantiateMeta):
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
-
-
-class _D2Meta(_NeverInstantiateMeta):
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
-
-
 class D0(metaclass=_D0Meta):
     """
     D0 stands for 0-dimensional data, usually refering to ints and floats.
@@ -41,20 +30,26 @@ class D0(metaclass=_D0Meta):
 Num = D0  # `Num` is a human-readable alias for `D0`
 
 
+class _D1Meta(_NeverInstantiateMeta):
+    def __instancecheck__(cls, __instance: Any) -> bool:
+        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
+
+
 class D1(metaclass=_D1Meta):
     """D1 stands for 1-dimensional data."""
 
     shape: Tuple[int]
 
 
+class _D2Meta(_NeverInstantiateMeta):
+    def __instancecheck__(cls, __instance: Any) -> bool:
+        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
+
+
 class D2(metaclass=_D2Meta):
     """D2 stands for 2-dimensional data."""
 
     shape: Tuple[int, int]
-
-    @abstractmethod
-    def __init__(self) -> None:
-        ...
 
 
 class _TickersDescriptor(_NeverInstantiate):

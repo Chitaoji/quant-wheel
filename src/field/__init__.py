@@ -1,5 +1,5 @@
 """
-Contains the necessary utils for fields.
+Contains necessary utils for fields: field(), fieldtype(), etc.
 
 NOTE: this module is private. All functions and objects are available in the main
 `quant_wheel` namespace - use that instead.
