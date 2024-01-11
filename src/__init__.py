@@ -21,13 +21,14 @@ lazyr.register("pandas")
 
 # pylint: disable=wrong-import-position
 from . import abcv, core, field, operator
-from .__version__ import __version__
-from .abcv import *
-from .core import *
-from .field import *
 
 __all__ = []
 __all__.extend(abcv.__all__)
 __all__.extend(core.__all__)
 __all__.extend(field.__all__)
 __all__.extend(operator.__all__)
+
+from .__version__ import __version__
+from .abcv import *
+from .core import *
+from .field import *

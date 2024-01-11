@@ -38,7 +38,6 @@ class AbstractField(ABCV):
     @final
     @__init__.val
     def _init_validator(self) -> None:
-        print("check init")
         data = getattr(self, "data")
         if isinstance(data, D0):
             dim = D0

@@ -6,12 +6,14 @@ NOTE: this module is private. All functions and objects are available in the mai
 
 """
 
-from . import _types, abstract, basic
+from . import _types, abstract, basic, core
 from ._types import *
 from .abstract import *
 from .basic import *
+from .core import *
 
 __all__ = []
 __all__.extend(_types.__all__)
 __all__.extend(abstract.__all__)
 __all__.extend(basic.__all__)
+__all__.extend(core.__all__)

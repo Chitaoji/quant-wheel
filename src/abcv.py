@@ -11,7 +11,7 @@ from typing import Any, Callable, TypeVar
 
 from typing_extensions import Self
 
-C = TypeVar("C", bound=Callable)
+F = TypeVar("F", bound=Callable)
 
 __all__ = [
     "ABCV",
@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-def abstractmethodval(method: C) -> C:
+def abstractmethodval(method: F) -> F:
     """
     A decorator indicating abstract methods. Differences to `abc.abstractmethod()`
     that a new attribute 'val' is added to the method, which can be used to mark
@@ -45,7 +45,7 @@ def abstractmethodval(method: C) -> C:
     return f
 
 
-def method_validator(method: Callable) -> Callable[[C], C]:
+def method_validator(method: Callable) -> Callable[[F], F]:
     """
     Mark the decorated function as a validator of the specified abstract method.
     If the abstract method is implemented by subclasses, the validator should
@@ -64,7 +64,7 @@ def method_validator(method: Callable) -> Callable[[C], C]:
 
     """
 
-    def decorator(validator: C) -> C:
+    def decorator(validator: F) -> F:
         @wraps(validator)
         def wrapper(self: object, *args, **kwargs) -> Any:
             try:
@@ -82,7 +82,7 @@ def method_validator(method: Callable) -> Callable[[C], C]:
     return decorator
 
 
-def add_method_validator(validator: Callable) -> Callable[[C], C]:
+def add_method_validator(validator: Callable) -> Callable[[F], F]:
     """
     Add a validator to the decorated method during runtime.
 
@@ -98,7 +98,7 @@ def add_method_validator(validator: Callable) -> Callable[[C], C]:
 
     """
 
-    def decorator(method: C) -> C:
+    def decorator(method: F) -> F:
         @wraps(method)
         def wrapper(self: object, *args, **kwargs) -> Any:
             result = method(self, *args, **kwargs)
