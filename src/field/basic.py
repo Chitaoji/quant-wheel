@@ -28,7 +28,13 @@ class PandasField(AbstractField):
         timestamps: Optional[list] = None,
     ) -> Tuple[Data, list, list]:
         if isinstance(data, Num):
-            self.data, self.tickers, self.timestamps = data, None, None
+            if tickers and timestamps:
+                self.data = pd.DataFrame(data, columns=tickers, index=timestamps)
+            elif tickers:
+                self.data = pd.Series(data, index=tickers)
+            else:
+                self.data = data
+            self.tickers, self.timestamps = tickers, timestamps
         elif isinstance(data, pd.Series):
             tickers = tickers if tickers else data.index.tolist()
             self.data, self.tickers, self.timestamps = data, tickers, None
@@ -37,10 +43,13 @@ class PandasField(AbstractField):
             timestamps = timestamps if timestamps else data.index.tolist()
             self.data, self.tickers, self.timestamps = data, tickers, timestamps
         else:
-            self.data, self.tickers, self.timestamps = data, None, None
+            raise TypeError(
+                "argument 'data' must be of type Num, Series, or DataFrame, "
+                f"got {type(data)}"
+            )
 
     def shift(self, n: int = 1) -> None:
-        """Abstract method."""
+        """Implementing `AbstractField.shift()`."""
 
     def setrow(self, n: int, value: Union[Num, "Field[D1]"]) -> None:
-        """Abstract method."""
+        """Implementing `AbstractField.setrow()`."""

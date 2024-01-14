@@ -12,7 +12,7 @@ from .._types import _NeverInstantiate, _NeverInstantiateMeta
 Data = Union["D0", "D1", "D2"]
 D = TypeVar("D", "D0", "D1", "D2")
 
-__all__ = ["Field", "Num", "D0", "D1", "D2", "Data"]
+__all__ = ["Field", "Num", "D0", "D1", "D2", "Data", "get_shape"]
 
 
 class _D0Meta(_NeverInstantiateMeta):
@@ -27,7 +27,7 @@ class D0(metaclass=_D0Meta):
     """
 
 
-Num = D0  # `Num` is a human-readable alias for `D0`
+Num = D0  # `Num` is a human-readable alias for `D0`.
 
 
 class _D1Meta(_NeverInstantiateMeta):
@@ -50,6 +50,55 @@ class D2(metaclass=_D2Meta):
     """D2 stands for 2-dimensional data."""
 
     shape: Tuple[int, int]
+
+
+@overload
+def get_shape(data: D0) -> Tuple[()]:
+    ...
+
+
+@overload
+def get_shape(data: D1) -> Tuple[int]:
+    ...
+
+
+@overload
+def get_shape(data: D2) -> Tuple[int, int]:
+    ...
+
+
+def get_shape(data: Data) -> Tuple[int, ...]:
+    """
+    Get the shape of a Data object.
+
+    Parameters
+    ----------
+    data : Data
+        A Data object.
+
+    Returns
+    -------
+    Tuple[int, ...]
+        Tuple of ints.
+
+    """
+    if isinstance(data, D0):
+        return tuple()
+    return data.shape
+
+
+class _DimDescriptor(_NeverInstantiate):
+    @overload
+    def __get__(self, instance: "Field[D0]", owner: Any) -> Type[D0]:
+        ...
+
+    @overload
+    def __get__(self, instance: "Field[D1]", owner: Any) -> Type[D1]:
+        ...
+
+    @overload
+    def __get__(self, instance: "Field[D2]", owner: Any) -> Type[D2]:
+        ...
 
 
 class _TickersDescriptor(_NeverInstantiate):
@@ -102,7 +151,7 @@ class Field(Generic[D], metaclass=_FieldMeta):
     """Field structure."""
 
     data: D
-    dim: Type[D]
+    dim: _DimDescriptor
     tickers: _TickersDescriptor
     timestamps: _TimestampsDescriptor
     shape: _ShapeDescriptor
@@ -128,7 +177,7 @@ class Field(Generic[D], metaclass=_FieldMeta):
     ) -> None:
         ...
 
-    def shift(self: "Field[D2]", n: int = 1) -> None:
+    def shift(self: "Field[D2]", n: int = 1) -> "Field[D2]":
         """
         Shift timestamps by desired number of periods with an optional time n.
 

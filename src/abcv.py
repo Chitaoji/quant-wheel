@@ -75,20 +75,20 @@ def method_validator(method: Callable) -> Callable[[F], F]:
                     f"{method.__name__}() in {type(self)}."
                 )
 
-        setattr(wrapper, "__abcv_val__", method.__name__)
+        setattr(wrapper, "__validator_of__", method.__name__)
 
         return wrapper
 
     return decorator
 
 
-def add_method_validator(validator: Callable) -> Callable[[F], F]:
+def add_method_validator(validator: Callable[[object, Any], None]) -> Callable[[F], F]:
     """
     Add a validator to the decorated method during runtime.
 
     Parameters
     ----------
-    validator : Callable
+    validator : Callable[[object, Any], None]
         A method validator, see `method_validator()`.
 
     Returns
@@ -102,7 +102,7 @@ def add_method_validator(validator: Callable) -> Callable[[F], F]:
         @wraps(method)
         def wrapper(self: object, *args, **kwargs) -> Any:
             result = method(self, *args, **kwargs)
-            validator(self)
+            validator(self, result)
             return result
 
         return wrapper
@@ -117,9 +117,11 @@ class ABCVMeta(ABCMeta):
         super().__init__(*args, **kwargs)
         if cls.__abstractmethods__:
             return
+        if issubclass(cls, ABCV) and cls._trust_mode:
+            return
         for f in (getattr(cls, x) for x in dir(cls)):
-            if hasattr(f, "__abcv_val__"):
-                m: str = getattr(f, "__abcv_val__")
+            if hasattr(f, "__validator_of__"):
+                m: str = getattr(f, "__validator_of__")
                 setattr(cls, m, add_method_validator(f)(getattr(cls, m)))
 
 
@@ -128,6 +130,9 @@ class ABCV(metaclass=ABCVMeta):
     ABCVs stands for Abstract Base Classes with Validators.
 
     """
+
+    _trust_mode: bool = False  # Set this to True in a subclass if the implementions
+    # of all its methods can be fully trusted (NOT recommended).
 
 
 class MethodImplementionError(Exception):
