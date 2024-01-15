@@ -50,6 +50,11 @@ class PandasField(AbstractField):
 
     def shift(self, n: int = 1) -> None:
         """Implementing `AbstractField.shift()`."""
+        self.data: pd.DataFrame
+        return PandasField(
+            self.data.shift(n), tickers=self.tickers, timestamps=self.timestamps
+        )
 
     def setrow(self, n: int, value: Union[Num, "Field[D1]"]) -> None:
         """Implementing `AbstractField.setrow()`."""
+        self.data.iloc[n] = value

@@ -5,9 +5,9 @@ NOTE: this module is private. All functions and objects are available in the mai
 `quant_wheel` namespace - use that instead.
 
 """
-from typing import Any, Callable, Optional, Type, TypeVar, Union, final
+from typing import Any, Callable, Optional, Tuple, Type, TypeVar, Union, final
 
-from ..abcv import ABCV, MethodImplementionError, abstractmethodval
+from ..abcv import ABCV, MethodCallError, MethodImplementionError, abstractmethodval
 from ._types import D0, D1, D2, Data, Field, Num, get_shape
 
 C = TypeVar("C", bound=Callable)
@@ -17,6 +17,12 @@ __all__ = ["AbstractField"]
 
 class AbstractField(ABCV):
     """Abstract field type."""
+
+    data: Data
+    dim: Type[Data]
+    tickers: Optional[list]
+    timestamps: Optional[list]
+    shape: Tuple[int, ...]
 
     @abstractmethodval
     def __init__(
@@ -40,49 +46,58 @@ class AbstractField(ABCV):
         """Method for D2 only. See `Field.setrow()`."""
 
     @final
-    @__init__.val
-    def _init_validator(self, result: None) -> None:
-        self.__check_result_is_none(result)
-        data: Data = getattr(self, "data")
-        if isinstance(data, D0):
-            dim = D0
-            self.__check_attr_is_none("tickers", dim)
-            self.__check_attr_is_none("timestamps", dim)
-        elif isinstance(data, D1):
-            dim = D1
-            self.__check_attr_is_none("timestamps", dim)
-        elif isinstance(data, D2):
-            dim = D2
+    @__init__.after
+    def __field_post_init__(self, result: None) -> None:
+        self.__check_return_is_none(result)
+        if isinstance(self.data, D0):
+            self.dim = D0  # Automatically set the attribute 'dim'.
+            self.__check_attr_is_none("tickers")
+            self.__check_attr_is_none("timestamps")
+        elif isinstance(self.data, D1):
+            self.dim = D1
+            self.__check_attr_is_none("timestamps")
+        elif isinstance(self.data, D2):
+            self.dim = D2
         else:
             raise MethodImplementionError(
-                f"attribute 'data' must be of type D0, D1, or D2, got {type(data)}."
+                f"attribute 'data' must be of type D0, D1, or D2, got {type(self.data)}."
             )
-        # Set the 'dim' and 'shape' attributes automatically.
-        setattr(self, "dim", dim)
-        setattr(self, "shape", get_shape(data))
+        self.shape = get_shape(self.data)  # Automatically set the attribute 'shape'.
 
     @final
-    @shift.val
-    def _shift_validator(self, result: Field[D2]) -> None:
-        if isinstance(result, Field) and result.dim is D2:
+    @shift.before
+    @setrow.before
+    def _on_field_d2(self, *_, **__) -> None:
+        if self.dim is not D2:
+            raise MethodCallError(
+                f"calling this method requires dim = D2, got dim = {self.dim}."
+            )
+
+    @final
+    @shift.after
+    def _return_d2(self, result: Field[D2]) -> None:
+        if isinstance(result, AbstractField) and result.dim is D2:
             return
         raise MethodImplementionError(
             f"function result must be of type Field[D2], got {type(result)}."
         )
 
     @final
-    @setrow.val
-    def _setrow_validator(self, result: None) -> None:
-        self.__check_result_is_none(result)
+    @setrow.after
+    def _return_none(self, result: None) -> None:
+        self.__check_return_is_none(result)
 
-    def __check_attr_is_none(self, __name: str, __dim: Type[Data]) -> None:
+    def __repr__(self) -> str:
+        return repr(self.data)
+
+    def __check_attr_is_none(self, __name: str) -> None:
         if (v := getattr(self, __name)) is not None:
             raise MethodImplementionError(
-                f"attribute '{__name}' must be None when dim = {__dim.__name__}, got {v}."
+                f"attribute '{__name}' must be None when dim = {self.dim}, got {v}."
             )
 
-    def __check_result_is_none(self, __result: Any) -> None:
-        if __result is not None:
+    def __check_return_is_none(self, __return: Any) -> None:
+        if __return is not None:
             raise MethodImplementionError(
-                f"function result must be None, got {__result}."
+                f"function return must be None, got {__return}."
             )

@@ -26,8 +26,8 @@ def fieldtype(impl: Union[ImplName, Type[Field], None] = None) -> Type[Field]:
     Parameters
     ----------
     impl : Union[ImplName, Type[Field], None], optional
-        Specifies which implementation type of Field should be used. If None,
-        returns the default PandasField. By default None.
+        Specifies which implementation type of Field should be returned. If
+        None, returns the default PandasField type. By default None.
 
     Returns
     -------
@@ -62,8 +62,8 @@ def field(
     timestamps : Optional[list], optional
         The timestamps associated with the data, by default None.
     impl : Optional[Literal[pandas]], optional
-        Specifies the implementation type to use for the Field object, by default
-        None.
+        Specifies the implementation type to use for initializing the Field object.
+        If None, uses the default PandasField type. By default None.
 
     Returns
     -------

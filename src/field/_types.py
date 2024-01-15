@@ -19,6 +19,9 @@ class _D0Meta(_NeverInstantiateMeta):
     def __instancecheck__(cls, __instance: Any) -> bool:
         return isinstance(__instance, (int, float))
 
+    def __repr__(cls) -> str:
+        return cls.__name__
+
 
 class D0(metaclass=_D0Meta):
     """
@@ -34,6 +37,9 @@ class _D1Meta(_NeverInstantiateMeta):
     def __instancecheck__(cls, __instance: Any) -> bool:
         return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
 
+    def __repr__(cls) -> str:
+        return cls.__name__
+
 
 class D1(metaclass=_D1Meta):
     """D1 stands for 1-dimensional data."""
@@ -44,6 +50,9 @@ class D1(metaclass=_D1Meta):
 class _D2Meta(_NeverInstantiateMeta):
     def __instancecheck__(cls, __instance: Any) -> bool:
         return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
+
+    def __repr__(cls) -> str:
+        return cls.__name__
 
 
 class D2(metaclass=_D2Meta):
