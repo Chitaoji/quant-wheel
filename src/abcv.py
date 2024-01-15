@@ -38,12 +38,12 @@ def abstractmethodval(method: F) -> F:
 
     Parameters
     ----------
-    method : C
+    method : F
         Abstract method.
 
     Returns
     -------
-    C
+    F
         Decorated method with new attributes 'before' and 'after'.
 
     """
@@ -67,7 +67,7 @@ def before_validator(method: Callable) -> Callable[[F], F]:
 
     Returns
     -------
-    Callable[[C], C]
+    Callable[[F], F]
         A decorator to mark the validator.
 
     """
@@ -93,7 +93,7 @@ def after_validator(method: Callable) -> Callable[[F], F]:
 
     Returns
     -------
-    Callable[[C], C]
+    Callable[[F], F]
         A decorator to mark the validator.
 
     """
@@ -141,7 +141,7 @@ def add_validator(validator: Callable[[object, Any], None]) -> Callable[[F], F]:
 
     Returns
     -------
-    Callable[[C], C]
+    Callable[[F], F]
         A decorator that adds the validator to a method.
 
     """
@@ -237,7 +237,7 @@ class ABCVError(Exception):
 
 class MethodCallError(ABCVError):
     """
-    Raised when calling a method with wrong arguments or in a illegal instance.
+    Raised when calling a method with wrong arguments or on an illegal instance.
 
     """
 
