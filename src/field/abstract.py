@@ -5,12 +5,10 @@ NOTE: this module is private. All functions and objects are available in the mai
 `quant_wheel` namespace - use that instead.
 
 """
-from typing import Any, Callable, Optional, Tuple, Type, TypeVar, Union, final
+from typing import Any, Optional, Tuple, Type, Union, final
 
 from ..abcv import ABCV, MethodCallError, MethodImplementionError, abstractmethodval
 from ._types import D0, D1, D2, Data, Field, Num, get_shape
-
-C = TypeVar("C", bound=Callable)
 
 __all__ = ["AbstractField"]
 
@@ -24,6 +22,8 @@ class AbstractField(ABCV):
     timestamps: Optional[list]
     shape: Tuple[int, ...]
 
+    # ===================================================
+    # User must implement these:
     @abstractmethodval
     def __init__(
         self,
@@ -44,6 +44,11 @@ class AbstractField(ABCV):
     @abstractmethodval
     def setrow(self, n: int, value: Union[Num, Field[D1]]) -> None:
         """Method for D2 only. See `Field.setrow()`."""
+
+    # ===================================================
+
+    def __repr__(self) -> str:
+        return repr(self.data)
 
     @final
     @__init__.after
@@ -76,19 +81,12 @@ class AbstractField(ABCV):
     @final
     @shift.after
     def _return_d2(self, result: Field[D2]) -> None:
-        if isinstance(result, AbstractField) and result.dim is D2:
-            return
-        raise MethodImplementionError(
-            f"function result must be of type Field[D2], got {type(result)}."
-        )
+        self.__check_return_is_d2(result)
 
     @final
     @setrow.after
     def _return_none(self, result: None) -> None:
         self.__check_return_is_none(result)
-
-    def __repr__(self) -> str:
-        return repr(self.data)
 
     def __check_attr_is_none(self, __name: str) -> None:
         if (v := getattr(self, __name)) is not None:
@@ -101,3 +99,10 @@ class AbstractField(ABCV):
             raise MethodImplementionError(
                 f"function return must be None, got {__return}."
             )
+
+    def __check_return_is_d2(self, __return: Any) -> None:
+        if isinstance(__return, AbstractField) and __return.dim is D2:
+            return
+        raise MethodImplementionError(
+            f"function result must be of type Field[D2], got {type(__return)}."
+        )
