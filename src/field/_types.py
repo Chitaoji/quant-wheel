@@ -23,6 +23,22 @@ class _D0Meta(_NeverInstantiateMeta):
         return cls.__name__
 
 
+class _D1Meta(_NeverInstantiateMeta):
+    def __instancecheck__(cls, __instance: Any) -> bool:
+        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
+
+    def __repr__(cls) -> str:
+        return cls.__name__
+
+
+class _D2Meta(_NeverInstantiateMeta):
+    def __instancecheck__(cls, __instance: Any) -> bool:
+        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
+
+    def __repr__(cls) -> str:
+        return cls.__name__
+
+
 class D0(metaclass=_D0Meta):
     """
     D0 stands for 0-dimensional data, usually refering to ints and floats.
@@ -33,26 +49,10 @@ class D0(metaclass=_D0Meta):
 Num = D0  # `Num` is a human-readable alias for `D0`.
 
 
-class _D1Meta(_NeverInstantiateMeta):
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 1
-
-    def __repr__(cls) -> str:
-        return cls.__name__
-
-
 class D1(metaclass=_D1Meta):
     """D1 stands for 1-dimensional data."""
 
     shape: Tuple[int]
-
-
-class _D2Meta(_NeverInstantiateMeta):
-    def __instancecheck__(cls, __instance: Any) -> bool:
-        return hasattr(__instance, "shape") and len(getattr(__instance, "shape")) == 2
-
-    def __repr__(cls) -> str:
-        return cls.__name__
 
 
 class D2(metaclass=_D2Meta):
@@ -159,7 +159,6 @@ class _FieldMeta(_NeverInstantiateMeta):
 class Field(Generic[D], metaclass=_FieldMeta):
     """Field structure."""
 
-    data: D
     name: str
     dim: _DimDescriptor
     tickers: _TickersDescriptor
@@ -167,14 +166,13 @@ class Field(Generic[D], metaclass=_FieldMeta):
     shape: _ShapeDescriptor
 
     @overload
-    def __init__(self: "Field[D0]", data: Any, /, name: Optional[str] = None) -> None:
+    def __init__(self: "Field[D0]", data: Any, name: Optional[str] = None) -> None:
         ...
 
     @overload
     def __init__(
         self: "Field[D1]",
         data: Any,
-        /,
         name: Optional[str] = None,
         tickers: Optional[list] = None,
     ) -> None:
@@ -184,7 +182,6 @@ class Field(Generic[D], metaclass=_FieldMeta):
     def __init__(
         self: "Field[D2]",
         data: Any,
-        /,
         name: Optional[str] = None,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,

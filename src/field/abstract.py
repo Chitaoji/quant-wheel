@@ -8,7 +8,7 @@ NOTE: this module is private. All functions and objects are available in the mai
 from typing import Any, Optional, Tuple, Type, Union, final
 
 from ..abcv import ABCV, MethodCallError, MethodImplementionError, abstractmethodval
-from ._types import D0, D1, D2, Data, Field, Num, get_shape
+from ._types import D0, D1, D2, Data, Field, Num
 
 __all__ = ["AbstractField"]
 
@@ -16,27 +16,24 @@ __all__ = ["AbstractField"]
 class AbstractField(ABCV):
     """Abstract field type."""
 
-    data: Data
     name: str
     dim: Type[Data]
     tickers: Optional[list]
     timestamps: Optional[list]
     shape: Tuple[int, ...]
 
-    # ===================================================
     # User must implement these:
     @abstractmethodval
     def __init__(
         self,
         data: Any,
-        /,
         name: Optional[str] = None,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
     ) -> None:
         """
-        Initialzing and setting three attributes of the instance: self.data,
-        self.tickers, and self.timestamps. See `Field.__init__()`.
+        Initialzing and setting the attributes of the instance: self.name, self.dim,
+        self.tickers, self.timestamps, and self.shape. See `Field.__init__()`.
 
         """
 
@@ -48,39 +45,32 @@ class AbstractField(ABCV):
     def setrow(self, n: int, value: Union[Num, Field[D1]]) -> None:
         """Method for D2 only. See `Field.setrow()`."""
 
-    # ===================================================
-
+    # Private or magic methods：
     def __repr__(self) -> str:
-        return repr(self.data)
-
-    @final
-    @__init__.before
-    def __field_pre_init__(self, *_, name: Optional[str] = None, **__) -> None:
-        self.name = name if name else "temp"
+        return self.name
 
     @final
     @__init__.after
     def __field_post_init__(self, result: None) -> None:
         self.__check_return_is_none(result)
-        if isinstance(self.data, D0):
-            self.dim = D0  # Automatically set the attribute 'dim'.
+        self.__hasattr("name", "dim", "tickers", "timestamps", "shape")
+
+        if self.dim is D0:
             self.__check_attr_is_none("tickers")
             self.__check_attr_is_none("timestamps")
-        elif isinstance(self.data, D1):
-            self.dim = D1
+        elif self.dim is D1:
             self.__check_attr_is_none("timestamps")
-        elif isinstance(self.data, D2):
-            self.dim = D2
+        elif self.dim is D2:
+            ...
         else:
             raise MethodImplementionError(
-                f"attribute 'data' must be of type D0, D1, or D2, got {type(self.data)}."
+                f"attribute 'dim' must be D0, D1, or D2, got {self.dim}."
             )
-        self.shape = get_shape(self.data)  # Automatically set the attribute 'shape'.
 
     @final
     @shift.before
     @setrow.before
-    def _on_field_d2(self, *_, **__) -> None:
+    def _require_d2(self, *_, **__) -> None:
         if self.dim is not D2:
             raise MethodCallError(
                 f"calling this method requires dim = D2, got dim = {self.dim}."
@@ -114,3 +104,18 @@ class AbstractField(ABCV):
         raise MethodImplementionError(
             f"function result must be of type Field[D2], got {type(__return)}."
         )
+
+    def __hasattr(self, *__names: str) -> None:
+        missing = [x for x in __names if not hasattr(self, x)]
+        if missing:
+            if (len_a := len(missing)) == 1:
+                attr_msg = "attribute '" + missing[0] + "'"
+            elif len_a == 2:
+                attr_msg = "attributes '" + "' and '".join(missing) + "'"
+            else:
+                attr_msg = (
+                    "attributes '"
+                    + "', '".join(missing[:-1])
+                    + f"', and '{missing[-1]}'"
+                )
+            raise MethodImplementionError(f"{attr_msg} not set.")
