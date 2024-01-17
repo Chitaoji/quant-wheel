@@ -17,6 +17,7 @@ class AbstractField(ABCV):
     """Abstract field type."""
 
     data: Data
+    name: str
     dim: Type[Data]
     tickers: Optional[list]
     timestamps: Optional[list]
@@ -28,6 +29,8 @@ class AbstractField(ABCV):
     def __init__(
         self,
         data: Any,
+        /,
+        name: Optional[str] = None,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
     ) -> None:
@@ -49,6 +52,11 @@ class AbstractField(ABCV):
 
     def __repr__(self) -> str:
         return repr(self.data)
+
+    @final
+    @__init__.before
+    def __field_pre_init__(self, *_, name: Optional[str] = None, **__) -> None:
+        self.name = name if name else "temp"
 
     @final
     @__init__.after

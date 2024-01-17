@@ -19,6 +19,7 @@ This project falls under the BSD 3-Clause License.
 # | (_| | |_| | (_| | | | | ||_____\ V  V /| | | |  __/  __/ |
 #  \__, |\__,_|\__,_|_| |_|\__|     \_/\_/ |_| |_|\___|\___|_|
 #     |_|
+#                                                    @Chitaoji
 
 import lazyr
 

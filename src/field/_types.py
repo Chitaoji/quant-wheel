@@ -1,5 +1,5 @@
 """
-Contains typing classes: Field, Num, D0, D1, D2, Dim, etc.
+Contains typing classes: Field, Num, D0, D1, D2, etc.
 
 NOTE: this module is private. All functions and objects are available in the main
 `quant_wheel` namespace - use that instead.
@@ -160,19 +160,22 @@ class Field(Generic[D], metaclass=_FieldMeta):
     """Field structure."""
 
     data: D
+    name: str
     dim: _DimDescriptor
     tickers: _TickersDescriptor
     timestamps: _TimestampsDescriptor
     shape: _ShapeDescriptor
 
     @overload
-    def __init__(self: "Field[D0]", data: Any) -> None:
+    def __init__(self: "Field[D0]", data: Any, /, name: Optional[str] = None) -> None:
         ...
 
     @overload
     def __init__(
         self: "Field[D1]",
         data: Any,
+        /,
+        name: Optional[str] = None,
         tickers: Optional[list] = None,
     ) -> None:
         ...
@@ -181,6 +184,8 @@ class Field(Generic[D], metaclass=_FieldMeta):
     def __init__(
         self: "Field[D2]",
         data: Any,
+        /,
+        name: Optional[str] = None,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
     ) -> None:

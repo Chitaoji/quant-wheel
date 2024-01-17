@@ -21,9 +21,13 @@ __all__ = ["PandasField"]
 class PandasField(AbstractField):
     """A pandas implemention of Field."""
 
+    data: Union["DataFrame", "Series", Num]
+
     def __init__(
         self,
         data: Any,
+        /,
+        name: Optional[str] = None,
         tickers: Optional[list] = None,
         timestamps: Optional[list] = None,
     ) -> Tuple[Data, list, list]:
@@ -50,7 +54,6 @@ class PandasField(AbstractField):
 
     def shift(self, n: int = 1) -> None:
         """Implementing `AbstractField.shift()`."""
-        self.data: pd.DataFrame
         return PandasField(
             self.data.shift(n), tickers=self.tickers, timestamps=self.timestamps
         )
