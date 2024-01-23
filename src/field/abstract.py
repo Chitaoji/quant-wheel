@@ -47,13 +47,13 @@ class AbstractField(ABCV):
 
     # Private or magic methods：
     def __repr__(self) -> str:
-        return self.name
+        return f"<{self.dim} field> {self.name}"
 
     @final
     @__init__.after
     def __field_post_init__(self, result: None) -> None:
         self.__check_return_is_none(result)
-        self.__hasattr("name", "dim", "tickers", "timestamps", "shape")
+        self.__hasattr("name", "dim", "shape")
 
         if self.dim is D0:
             self.__check_attr_is_none("tickers")
@@ -73,7 +73,7 @@ class AbstractField(ABCV):
     def _require_d2(self, *_, **__) -> None:
         if self.dim is not D2:
             raise MethodCallError(
-                f"calling this method requires dim = D2, got dim = {self.dim}."
+                f"calling this method requires dim = D2, got dim = {repr(self.dim)}."
             )
 
     @final
@@ -87,9 +87,11 @@ class AbstractField(ABCV):
         self.__check_return_is_none(result)
 
     def __check_attr_is_none(self, __name: str) -> None:
+        self.__hasattr(__name)
         if (v := getattr(self, __name)) is not None:
             raise MethodImplementionError(
-                f"attribute '{__name}' must be None when dim = {self.dim}, got {v}."
+                f"attribute '{__name}' must be None when dim = {repr(self.dim)}, "
+                f"got {v}."
             )
 
     def __check_return_is_none(self, __return: Any) -> None:
@@ -108,14 +110,12 @@ class AbstractField(ABCV):
     def __hasattr(self, *__names: str) -> None:
         missing = [x for x in __names if not hasattr(self, x)]
         if missing:
-            if (len_a := len(missing)) == 1:
-                attr_msg = "attribute '" + missing[0] + "'"
-            elif len_a == 2:
-                attr_msg = "attributes '" + "' and '".join(missing) + "'"
+            if (len_m := len(missing)) == 1:
+                msg = f"attribute '{missing[0]}' not set."
+            elif len_m == 2:
+                _joined_attr_names = "' and '".join(missing)
+                msg = f"attributes '{_joined_attr_names}' not set."
             else:
-                attr_msg = (
-                    "attributes '"
-                    + "', '".join(missing[:-1])
-                    + f"', and '{missing[-1]}'"
-                )
-            raise MethodImplementionError(f"{attr_msg} not set.")
+                _joined_attr_names = "', '".join(missing[:-1])
+                msg = f"attributes '{_joined_attr_names}', and '{missing[-1]}' not set."
+            raise MethodImplementionError(msg)

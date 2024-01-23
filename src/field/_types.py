@@ -22,6 +22,9 @@ class _D0Meta(_NeverInstantiateMeta):
     def __repr__(cls) -> str:
         return cls.__name__
 
+    def __str__(cls) -> str:
+        return "0-dim"
+
 
 class _D1Meta(_NeverInstantiateMeta):
     def __instancecheck__(cls, __instance: Any) -> bool:
@@ -30,6 +33,9 @@ class _D1Meta(_NeverInstantiateMeta):
     def __repr__(cls) -> str:
         return cls.__name__
 
+    def __str__(cls) -> str:
+        return "1-dim"
+
 
 class _D2Meta(_NeverInstantiateMeta):
     def __instancecheck__(cls, __instance: Any) -> bool:
@@ -37,6 +43,9 @@ class _D2Meta(_NeverInstantiateMeta):
 
     def __repr__(cls) -> str:
         return cls.__name__
+
+    def __str__(cls) -> str:
+        return "2-dim"
 
 
 class D0(metaclass=_D0Meta):

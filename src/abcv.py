@@ -170,7 +170,7 @@ def __trans_before_validator(validator: F, method: Callable) -> F:
             return validator(self, *args, **kwargs)
         except MethodCallError as e:
             raise e << (
-                "This error occurs during the call of the method "
+                "This error occurs during the call of method "
                 f"{method.__name__}() in {type(self)}."
             )
 
